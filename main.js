@@ -85,7 +85,11 @@ let init = async()=>{
 let  handleMessageFromPeer =  async (message , MemberUID)=>{
     //console.log("message: ", message.text);
     message = JSON.parse(message.text)
+    
+    
     console.log("message: ", message);
+
+
 }
 
 let handleUserJoined = async (MemberUID) =>{
@@ -94,7 +98,7 @@ let handleUserJoined = async (MemberUID) =>{
     
 }
 
-let createOffer = async (MemberUID) => {
+let createOffer =    async (MemberUID) => {
     
    
     peerConnection = new RTCPeerConnection(server);
@@ -104,6 +108,12 @@ let createOffer = async (MemberUID) => {
 
     // retrive all the tracks of audio and video by calling getTracks
     // and add the sets of tracks and transmit it to other peer. 
+   
+    if(!localStream){
+        localStream =  await navigator.mediaDevices.getUserMedia(LocaldeviceRequest);
+    }
+
+
     localStream.getTracks().forEach(track => {
         peerConnection.addTrack(track,localStream);
     });
@@ -120,21 +130,29 @@ let createOffer = async (MemberUID) => {
      // Gathr ice candidates , listen for local ice candidates 
      peerConnection.addEventListener('icecandidate' ,event => {
          if(event.candidate){
-             //
-             console.log('New ICE candidate: ', event.candidate );
-         }
+            client.sendMessageToPeer({text: JSON.stringify({'type': 'candidate', 'candidate': event.candidate})},MemberUID);
+            document.getElementById('user-1').srcObject = localStream; 
+        }
      }); 
 
      // Listen for remote ICE candidate and add them to the local RTCpeerConnection 
+
+     
      
     // createk offer and send the offer 
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
 
-    // send message to the peer 
+    // sending offer to the peer user. 
+    
     client.sendMessageToPeer({text: JSON.stringify({'type': 'offer', 'offer': offer})},MemberUID); 
+
+    k
 
 }
 
+let createAnswer  =  async (MemberUID) => {
+    
+}
 
 init();
