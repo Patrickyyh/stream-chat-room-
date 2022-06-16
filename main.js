@@ -51,7 +51,10 @@ const server =  {
 
 
 const LocaldeviceRequest = {
-    video:true,
+    video:{
+        width: {min: 640, iedal:1920, max:1920},
+        height : {min: 480, iedal:1080, max:1080}
+    },
     audio:false,
 }
 
@@ -127,6 +130,7 @@ let handleUserJoined = async (MemberUID) =>{
 let handleUserLeft = async () => {
     // this action only take effect when the user really leaves the channel. 
     document.getElementById('user-2').style.display = 'none';
+    document.getElementById('user-1').classList.remove('smallFrame');
 }
 
 
@@ -140,7 +144,7 @@ let createPeerConnection = async (MemberUID)=> {
     document.getElementById('user-2').style.display = 'block';
     
 
-
+    document.getElementById('user-1').classList.add('smallFrame');
     // retrive all the tracks of audio and video by calling getTracks
     // and add the sets of tracks and transmit it to other peer. 
     if(!localStream){
@@ -185,8 +189,6 @@ let createOffer =    async (MemberUID) => {
     
     client.sendMessageToPeer({text: JSON.stringify({'type': 'offer', 'offer': offer})},MemberUID); 
 
-
-
 }
 
 
@@ -209,6 +211,32 @@ let addAnswer = async (answer) => {
 
 }
 
+let toggleCamera = async () => {
+    let videoTrack = localStream.getTracks().find(track => track.kind === 'video')
+
+    if(videoTrack.enabled){
+        videoTrack.enabled = false
+        document.getElementById('camera-btn').style.backgroundColor = 'rgb(255, 80, 80)'
+    }else{
+        videoTrack.enabled = true
+        document.getElementById('camera-btn').style.backgroundColor = 'rgb(179, 102, 249, .9)'
+    }
+
+}
+
+
+let toggleMic= async () => {
+    let micTrack = localStream.getTracks().find(track => track.kind === 'audio')
+
+    if(micTrack.enabled){
+        micTrack.enabled = false
+        document.getElementById('mic-btn').style.backgroundColor = 'rgb(255, 80, 80)'
+    }else{
+        micTrack.enabled = true
+        document.getElementById('mic-btn').style.backgroundColor = 'rgb(179, 102, 249, .9)'
+    }
+
+}
 
 let leaveChannel = async () => {
     await channel.leave();
@@ -216,5 +244,7 @@ let leaveChannel = async () => {
 }
 
 window.addEventListener('beforeunload', leaveChannel); 
+document.getElementById('camera-btn').addEventListener('click', toggleCamera); 
+document.getElementById('mic-btn').addEventListener('click', toggleMic); 
 
 init();
